@@ -29,6 +29,7 @@
 </template>
 
 <script>
+import './gt.js'
 export default {
   data () {
     // 声明局部函数实现校验
@@ -70,25 +71,71 @@ export default {
         if (!valid) {
           return false
         }
-        // 发送请求验证服务器端账号真实校验
-        let pro = this.$http({
-          url: '/mp/v1_0/authorizations',
-          method: 'POST',
-          data: this.loginForm
+        // 1.人机交互验证
+        this.$http({
+          url: '/mp/v1_0/captchas/' + this.loginForm.mobile,
+          method: 'GET'
         })
-        pro
           .then(res => {
             // console.log(res)
-            // 进入后台系统之前保存token,判断是否处于登录状态
-            window.sessionStorage.setItem('userinfo', JSON.stringify(res.data.data))
-            // name属性实现编程式导航
-            this.$router.push({ name: 'home' })
+            // 从res中通过对象解构赋值把data解构出来
+            let { data } = res.data
+            window.initGeetest(
+              {
+                // 以下配置参数来自服务端 SDK
+                gt: data.gt,
+                challenge: data.challenge,
+                offline: !data.success,
+                new_captcha: true,
+                product: 'bind' // 设置验证窗口样式的
+              },
+              captchaObj => {
+                // 这里可以调用验证实例 captchaObj 的实例方法
+                captchaObj
+                  .onReady(() => {
+                    // 验证码ready之后才能调用verify方法显示验证码
+                    captchaObj.verify() // 显示验证码窗口
+                  })
+                  .onSuccess(() => {
+                    // 行为校验正确的处理 2.验证账号设置
+                    this.loginAct()
+                  })
+                  .onError(() => {
+                    // 行为校验错误的处理
+                    return this.$message.error('验证失败,请重试')
+                  })
+              }
+            )
           })
           .catch(err => {
-            this.$message.error('手机号码或验证码错误:' + err)
-            // console.log(err)
+            return this.$message.error('获取极验秘钥失败：' + err)
           })
+        // 2.验证账号设置
+        // this.loginAct()
       })
+    }, // 验证账号
+    loginAct () {
+      // 发送请求验证服务器端账号真实校验
+      let pro = this.$http({
+        url: '/mp/v1_0/authorizations',
+        method: 'POST',
+        data: this.loginForm
+      })
+      pro
+        .then(res => {
+          // console.log(res)
+          // 进入后台系统之前保存token,判断是否处于登录状态
+          window.sessionStorage.setItem(
+            'userinfo',
+            JSON.stringify(res.data.data)
+          )
+          // name属性实现编程式导航
+          this.$router.push({ name: 'home' })
+        })
+        .catch(err => {
+          this.$message.error('手机号码或验证码错误:' + err)
+          // console.log(err)
+        })
     }
   }
 }
