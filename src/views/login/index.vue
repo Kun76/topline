@@ -8,7 +8,8 @@
           <el-input v-model="loginForm.mobile" placeholder="请输入手机号码"></el-input>
         </el-form-item>
         <el-form-item prop="code">
-          <el-input v-model="loginForm.code" placeholder="请输入验证码"></el-input>
+          <el-input v-model="loginForm.code" placeholder="请输入验证码" style="width:60%"></el-input>
+          <el-button type="info" style="width:40%" plain>获取验证码</el-button>
         </el-form-item>
         <el-form-item style="text-align:left;" prop="xieyi">
           <!-- 复选框，单个复选框直接设置v-model即可，接收true/false的信息，表示是否选中 -->
