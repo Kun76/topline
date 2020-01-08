@@ -5,10 +5,14 @@
         <img src="./logo_index.png" />
         <!-- prop使得校验规则可以找到当前目录进行匹配校验，值 就是当前项目的名称 -->
         <el-form-item prop="mobile">
-          <el-input v-model="loginForm.mobile" placeholder="请输入手机号码"></el-input>
+          <el-input v-model="loginForm.mobile" placeholder="请输入手机号码">
+            <i slot="prefix" class="iconfont icon-shouji"></i>
+          </el-input>
         </el-form-item>
         <el-form-item prop="code">
-          <el-input v-model="loginForm.code" placeholder="请输入验证码" style="width:60%"></el-input>
+          <el-input v-model="loginForm.code" placeholder="请输入验证码" style="width:60%">
+            <i slot="prefix" class="iconfont icon-anquan"></i>
+          </el-input>
           <el-button type="info" style="width:40%" plain>获取验证码</el-button>
         </el-form-item>
         <el-form-item style="text-align:left;" prop="xieyi">
@@ -22,7 +26,13 @@
         </el-form-item>
         <!-- 登录按钮 -->
         <el-form-item>
-          <el-button style="width:100%;" type="primary" @click="login()">登录</el-button>
+          <el-button
+            style="width:100%;"
+            type="primary"
+            @click="login()"
+            :loading="isActive"
+            :disabled="isActive"
+          >登录</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -31,7 +41,9 @@
 
 <script>
 import './gt.js'
+import '@/assets/iconfont/iconfont.css'
 export default {
+  name: 'Login',
   data () {
     // 声明局部函数实现校验
     let xieyiTest = function (rule, value, callback) {
@@ -59,7 +71,9 @@ export default {
         ],
         code: [{ required: true, message: '验证码必填' }],
         xieyi: [{ validator: xieyiTest }] // 自定义校验,协议validator
-      }
+      },
+      isActive: false, // 设置按钮禁用开关
+      ctaObj: null // 创建一个空对象,用来保存极验对象
     }
   },
   methods: {
@@ -72,6 +86,11 @@ export default {
         if (!valid) {
           return false
         }
+        // 极验对象存在就直接调用
+        if (this.ctaObj !== null) {
+          return this.ctaObj.verify()
+        }
+        this.isActive = true // 登录按钮处于等待、禁用状态
         // 1.人机交互验证
         this.$http({
           url: '/mp/v1_0/captchas/' + this.loginForm.mobile,
@@ -96,6 +115,8 @@ export default {
                   .onReady(() => {
                     // 验证码ready之后才能调用verify方法显示验证码
                     captchaObj.verify() // 显示验证码窗口
+                    this.isActive = false // 恢复按钮
+                    this.ctaObj = captchaObj // 极验对象赋予给ctaObj
                   })
                   .onSuccess(() => {
                     // 行为校验正确的处理 2.验证账号设置

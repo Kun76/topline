@@ -1,0 +1,23 @@
+{
+  "id": "1602129",
+  "name": "ok",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "1105010",
+      "name": "手机",
+      "font_class": "shouji",
+      "unicode": "e615",
+      "unicode_decimal": 58901
+    },
+    {
+      "icon_id": "7148319",
+      "name": "安全_2",
+      "font_class": "anquan",
+      "unicode": "e67a",
+      "unicode_decimal": 59002
+    }
+  ]
+}
