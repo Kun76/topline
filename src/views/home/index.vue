@@ -10,7 +10,7 @@
         :collapse-transition="false"
         router
       >
-        <el-menu-item index="1" :style="{width:isCollapse?'65px':'200px'}">
+        <el-menu-item index="/welcome" :style="{width:isCollapse?'65px':'200px'}">
           <i class="el-icon-location"></i>
           <span slot="title">首页</span>
         </el-menu-item>
@@ -47,7 +47,6 @@
           ></i>
           <span>江苏传智播客教育科技股份有限公司</span>
         </div>
-
         <div id="rt">
           <el-input type="text" placeholder="请输入搜索的文章内容" style="width:300px;">
             <i slot="prefix" class="el-input__icon el-icon-search"></i>
@@ -55,7 +54,7 @@
           <span style="margin:0 10px;">消息</span>
           <el-dropdown>
             <span class="el-dropdown-link">
-              <img :src="photo" alt width="40" height="40" />
+              <img :src="photo"  width="40" height="40"/>
               {{name}}
               <i class="el-icon-arrow-down el-icon--right"></i>
             </span>
@@ -140,6 +139,10 @@ export default {
       .el-dropdown-link {
         display: flex;
         align-items: center;
+         img {
+            margin-right: 10px;
+            border-radius: 50%;
+          }
       }
     }
   }
