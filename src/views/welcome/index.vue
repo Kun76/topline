@@ -1,5 +1,5 @@
 <template>
-  <div>welcome</div>
+  <div>后台登录首页</div>
 </template>
 
 <script>

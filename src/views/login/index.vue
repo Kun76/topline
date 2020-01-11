@@ -57,7 +57,7 @@ export default {
     }
     return {
       loginForm: {
-        mobile: '13911111111', // 手机号
+        mobile: '13011112222', // 手机号
         code: '246810', // 验证码
         xieyi: true // 协议
       },

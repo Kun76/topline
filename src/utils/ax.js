@@ -2,6 +2,8 @@
 // 引入vue
 import Vue from 'vue'
 import router from '@/router'
+// 引入json-bignt
+import JSONbig from 'json-bigint'
 // 导入axios模块
 import axios from 'axios'
 // 配置公共根地址(线上地址)
@@ -27,11 +29,19 @@ axios.interceptors.response.use(function (response) {
   // 响应成功的操作
   return response
 }, function (error) {
-  console.dir(error)
+  // console.dir(error)
   if (error.response.status === 401) {
     router.push({ name: 'login' })
     // return一个空函数来防止报错
-    return new Promise(function () {})
+    return new Promise(function () { })
   }
   return Promise.reject(error)
 })
+// axios配置数据转换器
+axios.defaults.transformResponse = [function (data) {
+  if (data) {
+    return JSONbig.parse(data)
+  } else {
+    return data
+  }
+}]

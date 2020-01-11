@@ -6,39 +6,30 @@
       <div slot="header" class="clearfix">
         <span>全部图文</span>
       </div>
-      <div class="text item">
-        <el-form ref="searchFormRef" :model="searchForm" label-width="100px">
-          <el-form-item label="文章状态：">
-            <el-radio v-model="searchForm.status" label>全部</el-radio>
-            <el-radio v-model="searchForm.status" :label="0">草稿</el-radio>
-            <el-radio v-model="searchForm.status" :label="1">待审核</el-radio>
-            <el-radio v-model="searchForm.status" :label="2">审核通过</el-radio>
-            <el-radio v-model="searchForm.status" :label="3">审核失败</el-radio>
-          </el-form-item>
-          <el-form-item label="频道列表：">
-            <el-select v-model="searchForm.channel_id" clearable placeholder="请选择">
-              <!-- clearable可以清除内容 -->
-              <el-option
-                v-for="item in channelList"
-                :key="item.id"
-                :label="item.name"
-                :value="item.id"
-              ></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="时间选择：">
-            <el-date-picker
-              v-model="timetotime"
-              type="daterange"
-              range-separator="至"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-              value-format="yyyy-MM-dd"
-            ></el-date-picker>
-          </el-form-item>
-        </el-form>
-      </div>
+      <el-form ref="searchFormRef" :model="searchForm" label-width="100px">
+        <el-form-item label="文章状态：">
+          <el-radio v-model="searchForm.status" label>全部</el-radio>
+          <el-radio v-model="searchForm.status" :label="0">草稿</el-radio>
+          <el-radio v-model="searchForm.status" :label="1">待审核</el-radio>
+          <el-radio v-model="searchForm.status" :label="2">审核通过</el-radio>
+          <el-radio v-model="searchForm.status" :label="3">审核失败</el-radio>
+        </el-form-item>
+        <el-form-item label="频道列表：">
+          <ChannelCom @slt="selectHandler"></ChannelCom>
+        </el-form-item>
+        <el-form-item label="时间选择：">
+          <el-date-picker
+            v-model="timetotime"
+            type="daterange"
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            value-format="yyyy-MM-dd"
+          ></el-date-picker>
+        </el-form-item>
+      </el-form>
     </el-card>
+    <!-- 显示卡片区 -->
     <el-card class="box-card">
       <div slot="header" class="clearfix">
         <span>共找到{{tot}}条符合条件的内容</span>
@@ -59,26 +50,45 @@
           </el-table-column>
           <el-table-column prop="pubdate" label="发布时间"></el-table-column>
           <el-table-column label="操作">
-            <el-button type="primary" icon="el-icon-edit" size="mini" round>修改</el-button>
-            <el-button type="danger" size="mini" icon="el-icon-delete" round>删除</el-button>
+            <template slot-scope="stData">
+              <el-button
+                type="primary"
+                icon="el-icon-edit"
+                size="mini"
+                round
+                @click="$router.push(`/articleedit/${stData.row.id}`)"
+              >修改</el-button>
+              <el-button
+                type="danger"
+                size="mini"
+                icon="el-icon-delete"
+                round
+                @click="del(stData.row.id)"
+              >删除</el-button>
+            </template>
           </el-table-column>
         </el-table>
       </div>
+      <el-pagination
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        :current-page="searchForm.page"
+        :page-sizes="[10, 20, 30, 40]"
+        :page-size="searchForm.per_page"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="tot"
+      ></el-pagination>
     </el-card>
-    <el-pagination
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"
-      :current-page="searchForm.page"
-      :page-sizes="[10, 20, 30, 40]"
-      :page-size="searchForm.per_page"
-      layout="total, sizes, prev, pager, next, jumper"
-      :total="tot"
-    ></el-pagination>
   </div>
 </template>
 
 <script>
+// 引入独立频道文件
+import ChannelCom from '@/components/channel.vue'
 export default {
+  components: {
+    ChannelCom
+  },
   name: 'Article',
   data () {
     return {
@@ -91,7 +101,6 @@ export default {
         per_page: 10 // 设置显示行数
       },
       timetotime: [], // 设置用来存储时间数据
-      channelList: [], // 用来存储频道数据
       articleList: [], // 文章列表
       tot: 0 // 文章总数
     }
@@ -125,19 +134,6 @@ export default {
       this.searchForm.page = val
       // this.getArticleList()
     },
-    // 获取频道数据
-    getchannelList () {
-      this.$http({
-        url: '/mp/v1_0/channels',
-        method: 'GET'
-      })
-        .then(res => {
-          this.channelList = res.data.data.channels
-        })
-        .catch(err => {
-          return this.$message.error('获取频道失败' + err)
-        })
-    },
     // 获取列表数据
     getArticleList () {
       // 过滤掉为空的参数
@@ -161,11 +157,37 @@ export default {
         .catch(err => {
           return this.$message.error('获取列表失败' + err)
         })
+    },
+    // 删除数据
+    del (id) {
+      this.$confirm('此操作将永久删除该文件, 是否继续?', '删除', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          let pro = this.$http({
+            url: `/mp/v1_0/articles/${id}`,
+            method: 'DELETE'
+          })
+          pro
+            .then(res => {
+              this.$message.success('文章删除成功!')
+              // 更新文章
+              this.getArticleList()
+            })
+            .catch(err => {
+              return this.$message.error('删除文章错误：' + err)
+            })
+        })
+        .catch(() => {})
+    },
+    // 设置频道method方法
+    selectHandler (val) {
+      this.searchForm.channel_id = val
     }
   },
   created () {
-    // 获取频道
-    this.getchannelList()
     // 获取列表
     this.getArticleList()
   }
@@ -175,5 +197,6 @@ export default {
 <style lang="less" scoped>
 .el-pagination {
   margin-top: 15px;
+  text-align: center;
 }
 </style>
