@@ -28,12 +28,23 @@
           </el-form-item>
         </el-form>
       </div>
-      <div class="rt">头像区域</div>
+      <div class="rt">
+        <el-upload
+          class="avatar-uploader"
+          action=""
+          :show-file-list="false"
+          :http-request="httpRequest"
+        >
+          <img v-if="accountForm.photo" :src="accountForm.photo" class="avatar" width="300" height="300"/>
+          <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+        </el-upload>
+      </div>
     </div>
   </el-card>
 </template>
 
 <script>
+import bus from '@/utils/bus.js'
 export default {
   name: 'Account',
   data () {
@@ -42,7 +53,8 @@ export default {
         name: '',
         mobile: '',
         email: '',
-        intro: ''
+        intro: '',
+        photo: ''
       },
       // 设置表单校验
       accountFormRules: {
@@ -58,6 +70,25 @@ export default {
     }
   },
   methods: {
+    // 自定义用户图标上传
+    httpRequest (res) {
+      // 利用res获取被上传文件对象
+      let pic = res.file
+      let fd = new FormData()
+      // 把图片对象放fd里面
+      fd.append('photo', pic)
+      this.$http({
+        url: '/mp/v1_0/user/photo',
+        method: 'patch',
+        data: fd
+      }).then(res => {
+        this.$message.success('更新用户头像成功')
+        bus.$emit('upAccountPhoto', res.data.data.photo)
+        this.getAccount()
+      }).catch(err => {
+        return this.$message.error('更新用户头像失败' + err)
+      })
+    },
     // 获取当前用户数据
     getAccount () {
       this.$http({
@@ -84,13 +115,16 @@ export default {
         url: '/mp/v1_0/user/profile',
         method: 'patch',
         data: this.accountForm
-      }).then(res => {
-        this.$message.success('修改用户信息成功')
-        // 刷新信息
-        this.getAccount()
-      }).catch(err => {
-        this.$message.error('修改用户信息失败' + err)
       })
+        .then(res => {
+          this.$message.success('修改用户信息成功')
+          bus.$emit('upAccountName', res.data.data.name)
+          // 刷新信息
+          this.getAccount()
+        })
+        .catch(err => {
+          this.$message.error('修改用户信息失败' + err)
+        })
     }
   },
   created () {
@@ -106,11 +140,9 @@ export default {
   justify-content: space-between;
   .lt {
     width: 40%;
-    background-color: pink;
   }
   .rt {
     width: 30%;
-    background-color: lightgreen;
   }
 }
 </style>

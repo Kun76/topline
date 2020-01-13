@@ -14,7 +14,7 @@
           <i class="el-icon-location"></i>
           <span slot="title">首页</span>
         </el-menu-item>
-        <el-submenu index="2"  :style="{width:isCollapse?'65px':'200px'}">
+        <el-submenu index="2" :style="{width:isCollapse?'65px':'200px'}">
           <template slot="title">
             <i class="el-icon-menu"></i>
             <span>内容管理</span>
@@ -23,7 +23,7 @@
             <el-menu-item index="/articleadd">发布文章</el-menu-item>
             <el-menu-item index="/article">文章列表</el-menu-item>
             <el-menu-item index="2-3">评论列表</el-menu-item>
-            <el-menu-item index="2-4">素材管理</el-menu-item>
+            <el-menu-item index="/material">素材管理</el-menu-item>
           </el-menu-item-group>
         </el-submenu>
         <el-menu-item index="3" :style="{width:isCollapse?'65px':'200px'}">
@@ -54,7 +54,7 @@
           <span style="margin:0 10px;">消息</span>
           <el-dropdown>
             <span class="el-dropdown-link">
-              <img :src="photo"  width="40" height="40"/>
+              <img :src="photo" width="40" height="40" />
               {{name}}
               <i class="el-icon-arrow-down el-icon--right"></i>
             </span>
@@ -74,19 +74,28 @@
 </template>
 
 <script>
+import bus from '@/utils/bus.js'
 export default {
   name: 'Home',
   data () {
     return {
+      tmpname: '', // 临时账户名称
+      tmpphoto: '', // 临时账户头像
       isCollapse: false // false:展开   true:折叠
     }
   },
   computed: {
     name () {
-      return JSON.parse(window.sessionStorage.getItem('userinfo')).name
+      return (
+        this.tmpname ||
+        JSON.parse(window.sessionStorage.getItem('userinfo')).name
+      )
     },
     photo () {
-      return JSON.parse(window.sessionStorage.getItem('userinfo')).photo
+      return (
+        this.tmpphoto ||
+        JSON.parse(window.sessionStorage.getItem('userinfo')).photo
+      )
     }
   },
   methods: {
@@ -105,6 +114,22 @@ export default {
         })
         .catch(() => {})
     }
+  },
+  created () {
+    // 更新用户名称
+    bus.$on('upAccountName', nm => {
+      this.tmpname = nm
+      let userinfo = JSON.parse(window.sessionStorage.getItem('userinfo'))
+      userinfo.name = nm
+      window.sessionStorage.setItem('userinfo', JSON.stringify(userinfo))
+    })
+    // 更新用户头像
+    bus.$on('upAccountPhoto', pto => {
+      this.tmpphoto = pto
+      let userinfo = JSON.parse(window.sessionStorage.getItem('userinfo'))
+      userinfo.photo = pto
+      window.sessionStorage.setItem('userinfo', JSON.stringify(userinfo))
+    })
   }
 }
 </script>
@@ -139,10 +164,10 @@ export default {
       .el-dropdown-link {
         display: flex;
         align-items: center;
-         img {
-            margin-right: 10px;
-            border-radius: 50%;
-          }
+        img {
+          margin-right: 10px;
+          border-radius: 50%;
+        }
       }
     }
   }

@@ -36,7 +36,8 @@
         <el-table :data="articleList" style="width: 100%">
           <el-table-column label="图标">
             <template slot-scope="stData">
-              <img :src="stData.row.cover.images[0]" width="150" height="100" />
+              <img :src="stData.row.cover.images[0]" width="150" height="100" v-if="stData.row.cover.images[0]"/>
+              <img v-else src="../login/logo_index.png" width="150" height="100" />
             </template>
           </el-table-column>
           <el-table-column prop="title" label="标题"></el-table-column>
