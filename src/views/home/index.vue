@@ -22,11 +22,11 @@
           <el-menu-item-group>
             <el-menu-item index="/articleadd">发布文章</el-menu-item>
             <el-menu-item index="/article">文章列表</el-menu-item>
-            <el-menu-item index="2-3">评论列表</el-menu-item>
+            <el-menu-item >评论列表</el-menu-item>
             <el-menu-item index="/material">素材管理</el-menu-item>
           </el-menu-item-group>
         </el-submenu>
-        <el-menu-item index="3" :style="{width:isCollapse?'65px':'200px'}">
+        <el-menu-item index="/fans" :style="{width:isCollapse?'65px':'200px'}">
           <i class="el-icon-document"></i>
           <span slot="title">粉丝管理</span>
         </el-menu-item>

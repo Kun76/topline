@@ -21,8 +21,8 @@
           <ul>
             <li class="uploadbox" v-for="item in covernm" :key="item.id" @click="showDialog(item)">
               <span>点击图标选择图片</span>
-              <div v-if="!addForm.cover.images[0]" class="el-icon-picture-outline"></div>
-              <img v-if="addForm.cover.images[0]" :src="addForm.cover.images[0]" alt="">
+              <img v-if="addForm.cover.images[item-1]" :src="addForm.cover.images[item-1]" alt="">
+                <div v-else class="el-icon-picture-outline"></div>
             </li>
           </ul>
         </el-form-item>
